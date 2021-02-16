@@ -118,50 +118,129 @@ for i in range(100):
   # Update the progress bar with each iteration.
   latest_iteration.text(f'Iteration {i+1}')
   bar.progress(i + 1)
-  time.sleep(0.1)
+  time.sleep(0.001)
 
 '...and now we\'re done!'
 
 ###############################################
 """ 
-# 
+# Create a data explorer app
+
+# -----------  UBER PICKUPS  -----------
+"""
+
+st.title('Uber pickups in NYC')
+
+###############################################
+""" 
+### fetch some data  
+"""
+DATE_COLUMN = 'date/time'
+DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
+         'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
+
+
+""" 
+#### Effortless caching
+You don’t want to reload the data each time the app is updated – luckily Streamlit allows you to cache the data.
+
+Try adding @st.cache before the load_data declaration
+"""
+
+
+@st.cache    # will cache the data and wont reload it every time
+def load_data(nrows):
+    data = pd.read_csv(DATA_URL, nrows=nrows)
+    lowercase = lambda x: str(x).lower()
+    data.rename(lowercase, axis='columns', inplace=True)
+    data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
+    return data
+
+
+# Create a text element and let the reader know the data is loading.   
+data_load_state = st.text('Loading data...')
+
+# Load 10,000 rows of data into the dataframe.
+data = load_data(10000)
+# Notify the reader that the data was successfully loaded.
+data_load_state.text("Done! (using st.cache)")
+
+
+###############################################
+""" 
+### Inspecting data 
+
+#### Use a button to toggle data
+"""
+"add a checkbox to your app with st.checkbox('Show raw data')"
+if st.checkbox('Show raw data'):
+    st.subheader('Raw data')
+    st.write(data)
+
+
+st.subheader('Number of pickups by hour')
+
+'Use NumPy to generate a histogram that breaks down pickup times binned by hour'
+
+hist_values = np.histogram(
+    data[DATE_COLUMN].dt.hour, bins = 24, range=(0,24))[0]
+
+st.bar_chart(hist_values)
+
+
+###############################################
+""" 
+# Data on the Map
+"""
+"""
+Filter results with a slider 
+"""
+hour_to_filter = st.slider('hour', 0, 23, 17)  # min: 0h, max: 23h, default: 17h
+
+filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
+st. subheader(f"Map of all pickups at {hour_to_filter}:00")
+st.map(filtered_data)
+###############################################
+
+###############################################
+"""
+###Use a button to toggle data
+"""
+"add a checkbox to your app with st.checkbox('Show raw data')"
+if st.checkbox('Show raw data'):
+    st.subheader('Raw data')
+    st.write(data)
+
+
+###############################################
+"""
+###
+"""
+
+
+###############################################
+"""
+###
 """
 
 
 
 ###############################################
-""" 
-# 
 """
-
+###
+"""
 
 
 
 ###############################################
-""" 
-# 
+"""
+###
 """
 
 
 
 
-###############################################
-""" 
-# 
-"""
 
 
 
 
-###############################################
-""" 
-# 
-"""
-
-
-
-
-###############################################
-""" 
-# 
-"""
